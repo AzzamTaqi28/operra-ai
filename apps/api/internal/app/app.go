@@ -14,7 +14,8 @@ import (
 	"operra/api/internal/platform/middleware"
 	"operra/api/internal/platform/response"
 	"operra/api/internal/users"
-	workflowapi "operra/api/internal/workflow"
+	configworkflow "operra/api/internal/workflow"
+	workflowapi "operra/api/internal/workflows"
 )
 
 type Logger interface {
@@ -56,9 +57,9 @@ func New(cfg config.Config, db *sql.DB, log Logger) *App {
 func (a *App) routes() {
 	authService := auth.NewService(a.db, a.cfg.JWTSecret)
 	authHandler := auth.NewHandler(authService, a.cfg.JWTSecret)
-	workflowHandler := workflowapi.NewHandler()
 	departmentHandler := departments.NewHandler(departments.NewService(a.db))
 	userHandler := users.NewHandler(users.NewService(a.db))
+	workflowHandler := workflowapi.NewHandler(workflowapi.NewService(a.db, configworkflow.GenerateMermaid, configworkflow.ValidateConfig))
 
 	a.Get("/health", func(c *fiber.Ctx) error {
 		return response.Success(c, fiber.Map{
@@ -92,7 +93,7 @@ func (a *App) routes() {
 	api := a.Group("/api/v1")
 	authGroup := api.Group("/auth")
 	authHandler.RegisterRoutes(authGroup)
-	workflowGroup := api.Group("/workflows", middleware.RequireAuth(a.cfg.JWTSecret, authService))
+	workflowGroup := api.Group("/workflows", middleware.RequireAuth(a.cfg.JWTSecret, authService), middleware.RequireAnyRole("owner", "admin"))
 	workflowHandler.RegisterRoutes(workflowGroup)
 
 	protectedAPI := api.Group("", middleware.RequireAuth(a.cfg.JWTSecret, authService))
