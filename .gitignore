@@ -1,0 +1,11 @@
+.env
+.DS_Store
+node_modules/
+dist/
+bin/
+coverage/
+*.log
+apps/*/node_modules/
+apps/*/.next/
+apps/*/dist/
+apps/*/coverage/
