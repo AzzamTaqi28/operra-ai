@@ -13,6 +13,7 @@ import (
 	"operra/api/internal/platform/config"
 	"operra/api/internal/platform/middleware"
 	"operra/api/internal/platform/response"
+	"operra/api/internal/requests"
 	"operra/api/internal/users"
 	configworkflow "operra/api/internal/workflow"
 	workflowapi "operra/api/internal/workflows"
@@ -60,6 +61,7 @@ func (a *App) routes() {
 	departmentHandler := departments.NewHandler(departments.NewService(a.db))
 	userHandler := users.NewHandler(users.NewService(a.db))
 	workflowHandler := workflowapi.NewHandler(workflowapi.NewService(a.db, configworkflow.GenerateMermaid, configworkflow.ValidateConfig))
+	requestHandler := requests.NewHandler(requests.NewService(a.db))
 
 	a.Get("/health", func(c *fiber.Ctx) error {
 		return response.Success(c, fiber.Map{
@@ -97,6 +99,8 @@ func (a *App) routes() {
 	workflowHandler.RegisterRoutes(workflowGroup)
 
 	protectedAPI := api.Group("", middleware.RequireAuth(a.cfg.JWTSecret, authService))
+	requestsGroup := protectedAPI.Group("/purchase-requests")
+	requestHandler.RegisterRoutes(requestsGroup)
 	departmentsGroup := protectedAPI.Group("/departments", middleware.RequireAnyRole("owner", "admin"))
 	departmentHandler.RegisterRoutes(departmentsGroup)
 	usersGroup := protectedAPI.Group("/users", middleware.RequireAnyRole("owner", "admin"))
