@@ -1,18 +1,11 @@
 # Web
 
-Next.js frontend for Operra.
+Next.js frontend shell for Operra.
 
-Initial work will follow the frontend tasks in `docs/codex-task-plan.md`.
+Current scope:
 
-Planned areas:
+- repository scaffold
+- app shell
+- styles baseline
 
-- dashboard
-- purchase requests
-- pending approvals
-- workflows
-- AI workflow builder
-- users
-- departments
-- audit logs
-- exports
-- settings
+Later tasks will add the operational screens from `docs/ui.md`.
