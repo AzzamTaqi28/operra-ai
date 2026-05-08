@@ -28,6 +28,51 @@ type AuthService interface {
 	CurrentUser(userID, organizationID string) (*CurrentUser, error)
 }
 
+func CurrentUserFromCtx(c *fiber.Ctx) (*CurrentUser, bool) {
+	user, ok := c.Locals("current_user").(*CurrentUser)
+	return user, ok && user != nil
+}
+
+func HasAnyRole(user *CurrentUser, roles ...string) bool {
+	if user == nil {
+		return false
+	}
+
+	roleSet := make(map[string]struct{}, len(user.Roles))
+	for _, role := range user.Roles {
+		roleSet[role] = struct{}{}
+	}
+
+	for _, role := range roles {
+		if _, ok := roleSet[role]; ok {
+			return true
+		}
+	}
+
+	return false
+}
+
+func RequireAnyRole(roles ...string) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		user, ok := CurrentUserFromCtx(c)
+		if !ok {
+			return response.Error(c, fiber.StatusUnauthorized, response.APIError{
+				Code:    "UNAUTHORIZED",
+				Message: "unauthorized",
+			})
+		}
+
+		if !HasAnyRole(user, roles...) {
+			return response.Error(c, fiber.StatusForbidden, response.APIError{
+				Code:    "FORBIDDEN",
+				Message: "forbidden",
+			})
+		}
+
+		return c.Next()
+	}
+}
+
 func RequireAuth(secret string, svc AuthService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		authHeader := c.Get("Authorization")

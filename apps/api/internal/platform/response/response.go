@@ -14,6 +14,13 @@ func Success(c *fiber.Ctx, data any) error {
 	})
 }
 
+func SuccessList(c *fiber.Ctx, data any, pagination any) error {
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"data":       data,
+		"pagination": pagination,
+	})
+}
+
 func Error(c *fiber.Ctx, status int, err APIError) error {
 	return c.Status(status).JSON(fiber.Map{
 		"error": err,

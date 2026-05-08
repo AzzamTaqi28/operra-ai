@@ -9,9 +9,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	"operra/api/internal/auth"
+	"operra/api/internal/departments"
 	"operra/api/internal/platform/config"
 	"operra/api/internal/platform/middleware"
 	"operra/api/internal/platform/response"
+	"operra/api/internal/users"
 	workflowapi "operra/api/internal/workflow"
 )
 
@@ -55,6 +57,8 @@ func (a *App) routes() {
 	authService := auth.NewService(a.db, a.cfg.JWTSecret)
 	authHandler := auth.NewHandler(authService, a.cfg.JWTSecret)
 	workflowHandler := workflowapi.NewHandler()
+	departmentHandler := departments.NewHandler(departments.NewService(a.db))
+	userHandler := users.NewHandler(users.NewService(a.db))
 
 	a.Get("/health", func(c *fiber.Ctx) error {
 		return response.Success(c, fiber.Map{
@@ -90,4 +94,10 @@ func (a *App) routes() {
 	authHandler.RegisterRoutes(authGroup)
 	workflowGroup := api.Group("/workflows", middleware.RequireAuth(a.cfg.JWTSecret, authService))
 	workflowHandler.RegisterRoutes(workflowGroup)
+
+	protectedAPI := api.Group("", middleware.RequireAuth(a.cfg.JWTSecret, authService))
+	departmentsGroup := protectedAPI.Group("/departments", middleware.RequireAnyRole("owner", "admin"))
+	departmentHandler.RegisterRoutes(departmentsGroup)
+	usersGroup := protectedAPI.Group("/users", middleware.RequireAnyRole("owner", "admin"))
+	userHandler.RegisterRoutes(usersGroup)
 }
