@@ -225,14 +225,19 @@ func (s *Service) Login(ctx context.Context, req LoginRequest) (*LoginResponse, 
 
 func (s *Service) CurrentUser(userID, organizationID string) (*middleware.CurrentUser, error) {
 	row := s.db.QueryRowContext(context.Background(), `
-		SELECT id::text, organization_id::text, name, email, status
+		SELECT id::text, organization_id::text, department_id::text, name, email, status
 		FROM users
 		WHERE id = $1 AND organization_id = $2
 	`, userID, organizationID)
 
 	var user middleware.CurrentUser
-	if err := row.Scan(&user.ID, &user.OrganizationID, &user.Name, &user.Email, &user.Status); err != nil {
+	var departmentID sql.NullString
+	if err := row.Scan(&user.ID, &user.OrganizationID, &departmentID, &user.Name, &user.Email, &user.Status); err != nil {
 		return nil, err
+	}
+	if departmentID.Valid {
+		value := departmentID.String
+		user.DepartmentID = &value
 	}
 
 	roles, err := s.rolesForUser(context.Background(), organizationID, userID)

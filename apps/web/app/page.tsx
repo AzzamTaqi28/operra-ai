@@ -12,8 +12,8 @@ export default function HomePage() {
         <p className="eyebrow">Operra v0.1</p>
         <h1>Purchase approvals with a system of record.</h1>
         <p className="lede">
-          This frontend is the initial Next.js shell for the Operra monorepo.
-          It will host request, approval, workflow, audit, and export screens.
+          The frontend shell now includes the core product routes for requests,
+          workflows, approvals, audit logs, exports, and AI workflow generation.
         </p>
 
         <div className="panel">
@@ -23,6 +23,10 @@ export default function HomePage() {
               <li key={item}>{item}</li>
             ))}
           </ul>
+          <div style={{ display: "flex", gap: 12, marginTop: 20, flexWrap: "wrap" }}>
+            <a className="nav-link" href="/dashboard">Open dashboard</a>
+            <a className="nav-link" href="/login">Login route</a>
+          </div>
         </div>
       </section>
     </main>

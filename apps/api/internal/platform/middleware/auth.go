@@ -14,6 +14,7 @@ import (
 type CurrentUser struct {
 	ID             string   `json:"id"`
 	OrganizationID string   `json:"organization_id"`
+	DepartmentID   *string  `json:"department_id,omitempty"`
 	Name           string   `json:"name"`
 	Email          string   `json:"email"`
 	Roles          []string `json:"roles"`

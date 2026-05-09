@@ -11,6 +11,7 @@ import (
 
 	"github.com/lib/pq"
 
+	"operra/api/internal/audit"
 	configworkflow "operra/api/internal/workflow"
 )
 
@@ -21,10 +22,15 @@ type Service struct {
 	db       *sql.DB
 	generate MermaidGenerator
 	validate ConfigValidator
+	audit    *audit.Service
 }
 
-func NewService(db *sql.DB, generate MermaidGenerator, validate ConfigValidator) *Service {
-	return &Service{db: db, generate: generate, validate: validate}
+func NewService(db *sql.DB, generate MermaidGenerator, validate ConfigValidator, auditSvc ...*audit.Service) *Service {
+	var svc *audit.Service
+	if len(auditSvc) > 0 {
+		svc = auditSvc[0]
+	}
+	return &Service{db: db, generate: generate, validate: validate, audit: svc}
 }
 
 type Workflow struct {
@@ -314,6 +320,16 @@ func (s *Service) CreateWorkflow(ctx context.Context, organizationID, createdBy 
 		return nil, err
 	}
 
+	if err := s.recordAuditTx(ctx, tx, organizationID, createdBy, "workflow.created", "workflow", &workflowID, nil, map[string]any{
+		"name": cfg.Name,
+		"type": cfg.Type,
+	}); err != nil {
+		return nil, err
+	}
+	if err := s.recordAuditTx(ctx, tx, organizationID, createdBy, "workflow.version_created", "workflow_version", &version.ID, nil, version); err != nil {
+		return nil, err
+	}
+
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
@@ -363,6 +379,10 @@ func (s *Service) CreateVersion(ctx context.Context, organizationID, createdBy, 
 		return nil, err
 	}
 
+	if err := s.recordAuditTx(ctx, tx, organizationID, createdBy, "workflow.version_created", "workflow_version", &version.ID, nil, version); err != nil {
+		return nil, err
+	}
+
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
@@ -376,8 +396,14 @@ func (s *Service) CreateVersion(ctx context.Context, organizationID, createdBy, 
 	}, nil
 }
 
-func (s *Service) ActivateVersion(ctx context.Context, organizationID, workflowID, versionID string) error {
-	result, err := s.db.ExecContext(ctx, `
+func (s *Service) ActivateVersion(ctx context.Context, organizationID, workflowID, versionID, actorUserID string) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	result, err := tx.ExecContext(ctx, `
 		UPDATE workflows
 		SET active_version_id = $3,
 		    status = 'active',
@@ -403,7 +429,14 @@ func (s *Service) ActivateVersion(ctx context.Context, organizationID, workflowI
 	if rows == 0 {
 		return sql.ErrNoRows
 	}
-	return nil
+
+	if err := s.recordAuditTx(ctx, tx, organizationID, actorUserID, "workflow.activated", "workflow", &workflowID, nil, map[string]any{
+		"active_version_id": versionID,
+	}); err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func (s *Service) buildConfig(name, typ string, raw json.RawMessage, version int) (configworkflow.Config, configworkflow.ValidationResult, error) {
@@ -573,3 +606,16 @@ func (e ErrInvalidWorkflow) Error() string {
 }
 
 var ErrConflict = errors.New("conflict")
+
+func (s *Service) recordAuditTx(ctx context.Context, tx *sql.Tx, organizationID, actorUserID, action, entityType string, entityID *string, oldValue, newValue any) error {
+	if s.audit == nil {
+		return nil
+	}
+
+	var actor *string
+	if strings.TrimSpace(actorUserID) != "" {
+		actor = &actorUserID
+	}
+
+	return s.audit.RecordTx(ctx, tx, organizationID, actor, action, entityType, entityID, oldValue, newValue, nil, nil)
+}

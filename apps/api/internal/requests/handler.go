@@ -26,6 +26,9 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 	router.Get("/:id", h.get)
 	router.Patch("/:id", h.update)
 	router.Post("/:id/submit", h.submit)
+	router.Post("/:id/approval-actions", h.approvalAction)
+	router.Post("/:id/comments", h.createComment)
+	router.Get("/:id/comments", h.listComments)
 }
 
 func (h *Handler) list(c *fiber.Ctx) error {
@@ -140,6 +143,94 @@ func (h *Handler) submit(c *fiber.Ctx) error {
 	return response.Success(c, result)
 }
 
+func (h *Handler) approvalAction(c *fiber.Ctx) error {
+	user, ok := middleware.CurrentUserFromCtx(c)
+	if !ok {
+		return unauthorized(c)
+	}
+
+	var req ApprovalActionRequest
+	if err := c.BodyParser(&req); err != nil {
+		return badRequest(c, "invalid request body")
+	}
+
+	result, err := h.service.ActOnRequest(c.UserContext(), user.OrganizationID, ActorContext{
+		UserID:       user.ID,
+		DepartmentID: user.DepartmentID,
+		Roles:        user.Roles,
+	}, c.Params("id"), req)
+	if err != nil {
+		return writeRequestError(c, err)
+	}
+
+	return response.Success(c, result)
+}
+
+func (h *Handler) createComment(c *fiber.Ctx) error {
+	user, ok := middleware.CurrentUserFromCtx(c)
+	if !ok {
+		return unauthorized(c)
+	}
+
+	var req struct {
+		Body string `json:"body"`
+	}
+	if err := c.BodyParser(&req); err != nil {
+		return badRequest(c, "invalid request body")
+	}
+
+	item, err := h.service.AddComment(c.UserContext(), user.OrganizationID, ActorContext{
+		UserID:       user.ID,
+		DepartmentID: user.DepartmentID,
+		Roles:        user.Roles,
+	}, c.Params("id"), req.Body)
+	if err != nil {
+		return writeRequestError(c, err)
+	}
+
+	return response.Success(c, item)
+}
+
+func (h *Handler) listComments(c *fiber.Ctx) error {
+	user, ok := middleware.CurrentUserFromCtx(c)
+	if !ok {
+		return unauthorized(c)
+	}
+
+	items, err := h.service.ListComments(c.UserContext(), user.OrganizationID, c.Params("id"))
+	if err != nil {
+		return writeRequestError(c, err)
+	}
+
+	return response.SuccessList(c, items, fiber.Map{
+		"page":      1,
+		"page_size": len(items),
+		"total":     len(items),
+	})
+}
+
+func (h *Handler) PendingApprovals(c *fiber.Ctx) error {
+	user, ok := middleware.CurrentUserFromCtx(c)
+	if !ok {
+		return unauthorized(c)
+	}
+
+	items, err := h.service.ListPendingApprovals(c.UserContext(), user.OrganizationID, ActorContext{
+		UserID:       user.ID,
+		DepartmentID: user.DepartmentID,
+		Roles:        user.Roles,
+	})
+	if err != nil {
+		return writeRequestError(c, err)
+	}
+
+	return response.SuccessList(c, items, fiber.Map{
+		"page":      1,
+		"page_size": len(items),
+		"total":     len(items),
+	})
+}
+
 func unauthorized(c *fiber.Ctx) error {
 	return response.Error(c, fiber.StatusUnauthorized, response.APIError{
 		Code:    "UNAUTHORIZED",
@@ -172,6 +263,11 @@ func writeRequestError(c *fiber.Ctx, err error) error {
 		return response.Error(c, fiber.StatusConflict, response.APIError{
 			Code:    "CONFLICT",
 			Message: "resource already exists",
+		})
+	case errors.Is(err, ErrForbidden) || strings.Contains(strings.ToLower(err.Error()), "forbidden") || strings.Contains(strings.ToLower(err.Error()), "cannot act"):
+		return response.Error(c, fiber.StatusForbidden, response.APIError{
+			Code:    "FORBIDDEN",
+			Message: "forbidden",
 		})
 	case strings.Contains(strings.ToLower(err.Error()), "required") || strings.Contains(strings.ToLower(err.Error()), "must") || strings.Contains(strings.ToLower(err.Error()), "invalid") || strings.Contains(strings.ToLower(err.Error()), "only requester"):
 		return response.Error(c, fiber.StatusBadRequest, response.APIError{

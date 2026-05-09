@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"operra/api/internal/attachments"
+	"operra/api/internal/audit"
 	configworkflow "operra/api/internal/workflow"
 )
 
@@ -19,39 +21,45 @@ type WorkflowLookup struct {
 }
 
 type Service struct {
-	db *sql.DB
+	db    *sql.DB
+	audit *audit.Service
 }
 
-func NewService(db *sql.DB) *Service {
-	return &Service{db: db}
+func NewService(db *sql.DB, auditSvc ...*audit.Service) *Service {
+	var svc *audit.Service
+	if len(auditSvc) > 0 {
+		svc = auditSvc[0]
+	}
+	return &Service{db: db, audit: svc}
 }
 
 type PurchaseRequest struct {
-	ID                    string                 `json:"id"`
-	OrganizationID        string                 `json:"organization_id"`
-	WorkflowID            *string                `json:"workflow_id,omitempty"`
-	WorkflowVersionID     *string                `json:"workflow_version_id,omitempty"`
-	RequesterID           string                 `json:"requester_id"`
-	DepartmentID          string                 `json:"department_id"`
-	Title                 string                 `json:"title"`
-	ItemName              string                 `json:"item_name"`
-	Description           string                 `json:"description"`
-	Quantity              float64                `json:"quantity"`
-	EstimatedAmount       float64                `json:"estimated_amount"`
-	Currency              string                 `json:"currency"`
-	Urgency               string                 `json:"urgency"`
-	ExpectedDate          *string                `json:"expected_date,omitempty"`
-	VendorName            *string                `json:"vendor_name,omitempty"`
-	Notes                 *string                `json:"notes,omitempty"`
-	Status                string                 `json:"status"`
-	CurrentStepInstanceID *string                `json:"current_step_instance_id,omitempty"`
-	SubmittedAt           *time.Time             `json:"submitted_at,omitempty"`
-	CompletedAt           *time.Time             `json:"completed_at,omitempty"`
-	CancelledAt           *time.Time             `json:"cancelled_at,omitempty"`
-	CreatedAt             time.Time              `json:"created_at"`
-	UpdatedAt             time.Time              `json:"updated_at"`
-	ApprovalSteps         []ApprovalStepInstance `json:"approval_steps,omitempty"`
-	ApprovalActions       []ApprovalAction       `json:"approval_actions,omitempty"`
+	ID                    string                   `json:"id"`
+	OrganizationID        string                   `json:"organization_id"`
+	WorkflowID            *string                  `json:"workflow_id,omitempty"`
+	WorkflowVersionID     *string                  `json:"workflow_version_id,omitempty"`
+	RequesterID           string                   `json:"requester_id"`
+	DepartmentID          string                   `json:"department_id"`
+	Title                 string                   `json:"title"`
+	ItemName              string                   `json:"item_name"`
+	Description           string                   `json:"description"`
+	Quantity              float64                  `json:"quantity"`
+	EstimatedAmount       float64                  `json:"estimated_amount"`
+	Currency              string                   `json:"currency"`
+	Urgency               string                   `json:"urgency"`
+	ExpectedDate          *string                  `json:"expected_date,omitempty"`
+	VendorName            *string                  `json:"vendor_name,omitempty"`
+	Notes                 *string                  `json:"notes,omitempty"`
+	Status                string                   `json:"status"`
+	CurrentStepInstanceID *string                  `json:"current_step_instance_id,omitempty"`
+	SubmittedAt           *time.Time               `json:"submitted_at,omitempty"`
+	CompletedAt           *time.Time               `json:"completed_at,omitempty"`
+	CancelledAt           *time.Time               `json:"cancelled_at,omitempty"`
+	CreatedAt             time.Time                `json:"created_at"`
+	UpdatedAt             time.Time                `json:"updated_at"`
+	ApprovalSteps         []ApprovalStepInstance   `json:"approval_steps,omitempty"`
+	ApprovalActions       []ApprovalAction         `json:"approval_actions,omitempty"`
+	Attachments           []attachments.Attachment `json:"attachments,omitempty"`
 }
 
 type ApprovalStepInstance struct {
@@ -300,9 +308,14 @@ func (s *Service) Get(ctx context.Context, organizationID, requestID string) (*P
 	if err != nil {
 		return nil, err
 	}
+	attachments, err := s.listAttachments(ctx, organizationID, requestID)
+	if err != nil {
+		return nil, err
+	}
 
 	item.ApprovalSteps = steps
 	item.ApprovalActions = actions
+	item.Attachments = attachments
 	return item, nil
 }
 
@@ -369,7 +382,16 @@ func (s *Service) Create(ctx context.Context, organizationID, requesterID string
 		return nil, err
 	}
 
-	return scanPurchaseRequest(row)
+	item, err := scanPurchaseRequest(row)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.recordAudit(ctx, organizationID, requesterID, "request.created", "purchase_request", &item.ID, nil, item); err != nil {
+		return nil, err
+	}
+
+	return item, nil
 }
 
 func (s *Service) Update(ctx context.Context, organizationID, requesterID, requestID string, req UpdateRequest) (*PurchaseRequest, error) {
@@ -517,7 +539,16 @@ func (s *Service) Update(ctx context.Context, organizationID, requesterID, reque
 		return nil, err
 	}
 
-	return scanPurchaseRequest(row)
+	updated, err := scanPurchaseRequest(row)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.recordAudit(ctx, organizationID, requesterID, "request.updated", "purchase_request", &updated.ID, current, updated); err != nil {
+		return nil, err
+	}
+
+	return updated, nil
 }
 
 func (s *Service) Submit(ctx context.Context, organizationID, requesterID, requestID string) (*SubmitResult, error) {
@@ -567,6 +598,15 @@ func (s *Service) Submit(ctx context.Context, organizationID, requesterID, reque
 	}
 
 	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	if err := s.recordAudit(ctx, organizationID, requesterID, "request.submitted", "purchase_request", &requestID, current, map[string]any{
+		"workflow_id":         workflow.WorkflowID,
+		"workflow_version_id": workflow.VersionID,
+		"approval_steps":      len(steps),
+		"status":              "in_review",
+	}); err != nil {
 		return nil, err
 	}
 
@@ -819,6 +859,34 @@ func (s *Service) listActions(ctx context.Context, organizationID, requestID str
 	return items, rows.Err()
 }
 
+func (s *Service) listAttachments(ctx context.Context, organizationID, requestID string) ([]attachments.Attachment, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT id::text, organization_id::text, purchase_request_id::text, uploaded_by::text, file_name, file_size, mime_type, storage_driver, storage_bucket, storage_key, checksum::text, created_at
+		FROM attachments
+		WHERE organization_id = $1 AND purchase_request_id = $2
+		ORDER BY created_at DESC
+	`, organizationID, requestID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []attachments.Attachment
+	for rows.Next() {
+		var item attachments.Attachment
+		var checksum sql.NullString
+		if err := rows.Scan(&item.ID, &item.OrganizationID, &item.PurchaseRequestID, &item.UploadedBy, &item.FileName, &item.FileSize, &item.MIMEType, &item.StorageDriver, &item.StorageBucket, &item.StorageKey, &checksum, &item.CreatedAt); err != nil {
+			return nil, err
+		}
+		if checksum.Valid {
+			value := checksum.String
+			item.Checksum = &value
+		}
+		items = append(items, item)
+	}
+	return items, rows.Err()
+}
+
 func (s *Service) ensureDepartment(ctx context.Context, organizationID, departmentID string) error {
 	if strings.TrimSpace(departmentID) == "" {
 		return errors.New("department_id is required")
@@ -962,6 +1030,7 @@ func scanPurchaseRequest(scanner requestRowScanner) (*PurchaseRequest, error) {
 		value := cancelledAt.Time
 		item.CancelledAt = &value
 	}
+	item.DepartmentID = departmentID
 
 	return &item, nil
 }
@@ -997,3 +1066,30 @@ func (e ErrInvalidWorkflow) Error() string {
 }
 
 var ErrConflict = errors.New("conflict")
+var ErrForbidden = errors.New("forbidden")
+
+func (s *Service) recordAudit(ctx context.Context, organizationID, actorUserID, action, entityType string, entityID *string, oldValue, newValue any) error {
+	if s.audit == nil {
+		return nil
+	}
+
+	var actor *string
+	if strings.TrimSpace(actorUserID) != "" {
+		actor = &actorUserID
+	}
+
+	return s.audit.Record(ctx, organizationID, actor, action, entityType, entityID, oldValue, newValue, nil, nil)
+}
+
+func (s *Service) recordAuditTx(ctx context.Context, tx *sql.Tx, organizationID, actorUserID, action, entityType string, entityID *string, oldValue, newValue any) error {
+	if s.audit == nil {
+		return nil
+	}
+
+	var actor *string
+	if strings.TrimSpace(actorUserID) != "" {
+		actor = &actorUserID
+	}
+
+	return s.audit.RecordTx(ctx, tx, organizationID, actor, action, entityType, entityID, oldValue, newValue, nil, nil)
+}

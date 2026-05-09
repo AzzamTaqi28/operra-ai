@@ -8,6 +8,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
+	"operra/api/internal/ai"
 	"operra/api/internal/platform/middleware"
 	"operra/api/internal/platform/response"
 	configworkflow "operra/api/internal/workflow"
@@ -15,10 +16,15 @@ import (
 
 type Handler struct {
 	service *Service
+	ai      *ai.Service
 }
 
-func NewHandler(service *Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(service *Service, aiSvc ...*ai.Service) *Handler {
+	var svc *ai.Service
+	if len(aiSvc) > 0 {
+		svc = aiSvc[0]
+	}
+	return &Handler{service: service, ai: svc}
 }
 
 func (h *Handler) RegisterRoutes(router fiber.Router) {
@@ -29,6 +35,7 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 	router.Post("/:id/versions", h.createVersion)
 	router.Post("/:id/versions/:version_id/activate", h.activate)
 	router.Post("/validate", h.validate)
+	router.Post("/generate-with-ai", h.generateWithAI)
 }
 
 func (h *Handler) list(c *fiber.Ctx) error {
@@ -125,7 +132,7 @@ func (h *Handler) activate(c *fiber.Ctx) error {
 		return unauthorized(c)
 	}
 
-	if err := h.service.ActivateVersion(c.UserContext(), user.OrganizationID, c.Params("id"), c.Params("version_id")); err != nil {
+	if err := h.service.ActivateVersion(c.UserContext(), user.OrganizationID, c.Params("id"), c.Params("version_id"), user.ID); err != nil {
 		return writeWorkflowError(c, err)
 	}
 
@@ -155,6 +162,39 @@ func (h *Handler) validate(c *fiber.Ctx) error {
 	return response.Success(c, fiber.Map{
 		"validation":      result,
 		"mermaid_diagram": h.service.generate(cfg),
+	})
+}
+
+func (h *Handler) generateWithAI(c *fiber.Ctx) error {
+	user, ok := middleware.CurrentUserFromCtx(c)
+	if !ok {
+		return unauthorized(c)
+	}
+	if h.ai == nil {
+		return response.Error(c, fiber.StatusInternalServerError, response.APIError{
+			Code:    "AI_PROVIDER_ERROR",
+			Message: "ai provider is not configured",
+		})
+	}
+
+	var req struct {
+		Prompt string `json:"prompt"`
+	}
+	if err := c.BodyParser(&req); err != nil {
+		return badRequest(c, "invalid request body")
+	}
+
+	result, err := h.ai.Generate(c.UserContext(), user.OrganizationID, user.ID, req.Prompt, h.service.validate, h.service.generate)
+	if err != nil {
+		return writeWorkflowError(c, err)
+	}
+
+	return response.Success(c, fiber.Map{
+		"workflow_json":   result.WorkflowJSON,
+		"explanation":     result.Explanation,
+		"mermaid_diagram": result.MermaidDiagram,
+		"validation":      result.Validation,
+		"warnings":        result.Warnings,
 	})
 }
 
@@ -196,6 +236,11 @@ func writeWorkflowError(c *fiber.Ctx, err error) error {
 		return response.Error(c, fiber.StatusUnprocessableEntity, response.APIError{
 			Code:    "WORKFLOW_INVALID",
 			Message: "workflow invalid",
+		})
+	case strings.Contains(strings.ToLower(err.Error()), "ai provider"):
+		return response.Error(c, fiber.StatusBadGateway, response.APIError{
+			Code:    "AI_PROVIDER_ERROR",
+			Message: err.Error(),
 		})
 	default:
 		return response.Error(c, fiber.StatusInternalServerError, response.APIError{
