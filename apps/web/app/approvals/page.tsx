@@ -3,9 +3,8 @@ import { redirect } from "next/navigation"
 
 import { AppShell } from "@/components/app-shell"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ApprovalsTable } from "@/components/approvals-table"
 import { apiGet, getToken, type ApiListResponse, type ApprovalQueueItem, type DepartmentListItem, type PurchaseRequest, type UserListItem } from "@/lib/api"
 
 function currency(amount: number, code = "IDR") {
@@ -35,43 +34,21 @@ export default async function ApprovalsPage() {
           <CardDescription>Requests waiting on your role-specific action.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Request ID</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Requester</TableHead>
-                <TableHead>Department</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Current Step</TableHead>
-                <TableHead>Scope</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {pendingApprovals.data.map((item) => {
-                const request = requestById.get(item.request_id)
-                return (
-                  <TableRow key={item.step_id}>
-                    <TableCell>{item.request_id.slice(0, 8)}</TableCell>
-                    <TableCell>{request?.title ?? "Unknown request"}</TableCell>
-                    <TableCell>{request ? (userById.get(request.requester_id) ?? request.requester_id.slice(0, 8)) : "—"}</TableCell>
-                    <TableCell>{request ? (departmentById.get(request.department_id) ?? request.department_id.slice(0, 8)) : "—"}</TableCell>
-                    <TableCell>{request ? currency(request.estimated_amount, request.currency) : "—"}</TableCell>
-                    <TableCell>{item.step_name}</TableCell>
-                    <TableCell>{item.scope}</TableCell>
-                    <TableCell><Badge>{item.status}</Badge></TableCell>
-                    <TableCell>
-                      <Button asChild variant="outline" size="sm">
-                        <Link href={`/requests/${item.request_id}`}>Open</Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
+          <ApprovalsTable
+            rows={pendingApprovals.data.map((item) => {
+              const request = requestById.get(item.request_id)
+              return {
+                request_id: item.request_id,
+                title: request?.title ?? "Unknown request",
+                requester: request ? (userById.get(request.requester_id) ?? request.requester_id.slice(0, 8)) : "—",
+                department: request ? (departmentById.get(request.department_id) ?? request.department_id.slice(0, 8)) : "—",
+                amount: request ? currency(request.estimated_amount, request.currency) : "—",
+                step_name: item.step_name,
+                scope: item.scope,
+                status: item.status,
+              }
+            })}
+          />
         </CardContent>
       </Card>
     </AppShell>

@@ -4,6 +4,7 @@ import { AppShell } from "@/components/app-shell"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { AttachmentUploadForm } from "@/components/attachment-upload-form"
 import { RequestActionPanel } from "@/components/request-action-panel"
 import { RequestCommentForm } from "@/components/request-comment-form"
 import {
@@ -100,8 +101,10 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
         <Card>
           <CardHeader>
             <CardTitle>Attachments</CardTitle>
+            <CardDescription>Upload files and download them through the authenticated web app.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="grid gap-4">
+            <AttachmentUploadForm requestId={item.id} />
             {item.attachments.length === 0 ? (
               <p className="text-sm text-slate-500">No attachments uploaded yet.</p>
             ) : (
@@ -112,6 +115,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
                     <TableHead>Size</TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead>Created At</TableHead>
+                    <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -121,6 +125,14 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
                       <TableCell>{attachment.file_size}</TableCell>
                       <TableCell>{attachment.mime_type}</TableCell>
                       <TableCell>{new Date(attachment.created_at).toLocaleDateString("id-ID")}</TableCell>
+                      <TableCell>
+                        <a
+                          href={`/api/purchase-requests/${item.id}/attachments/${attachment.id}/download`}
+                          className="font-medium text-[var(--accent)] hover:underline"
+                        >
+                          Download
+                        </a>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

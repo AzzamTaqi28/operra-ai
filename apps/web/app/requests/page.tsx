@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
+import { Input } from "@/components/ui/input"
 
 import { AppShell } from "@/components/app-shell"
 import { Badge } from "@/components/ui/badge"
@@ -12,12 +13,31 @@ function currency(amount: number, code = "IDR") {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: code, maximumFractionDigits: 0 }).format(amount)
 }
 
-export default async function RequestsPage() {
+function firstValue(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value ?? ""
+}
+
+export default async function RequestsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const token = await getToken()
   if (!token) redirect("/login")
 
+  const filters = await searchParams
+  const search = firstValue(filters.search)
+  const status = firstValue(filters.status)
+  const departmentId = firstValue(filters.department_id)
+  const fromDate = firstValue(filters.from_date)
+  const toDate = firstValue(filters.to_date)
+
+  const query = new URLSearchParams()
+  query.set("page_size", "20")
+  if (search) query.set("search", search)
+  if (status) query.set("status", status)
+  if (departmentId) query.set("department_id", departmentId)
+  if (fromDate) query.set("from_date", fromDate)
+  if (toDate) query.set("to_date", toDate)
+
   const [requests, users, departments] = await Promise.all([
-    apiGet<ApiListResponse<PurchaseRequest>>("/api/v1/purchase-requests?page_size=20", token),
+    apiGet<ApiListResponse<PurchaseRequest>>(`/api/v1/purchase-requests?${query.toString()}`, token),
     apiGet<ApiListResponse<UserListItem>>("/api/v1/users?page_size=100", token),
     apiGet<ApiListResponse<DepartmentListItem>>("/api/v1/departments?page_size=100", token),
   ])
@@ -28,12 +48,21 @@ export default async function RequestsPage() {
   return (
     <AppShell title="Purchase Requests" description="Drafts, submissions, approval timelines, comments, and attachments.">
       <div className="toolbar">
-        <div className="toolbar-filters">
-          <Badge>Status</Badge>
-          <Badge>Department</Badge>
-          <Badge>Date range</Badge>
-          <Badge>Search</Badge>
-        </div>
+        <form className="toolbar-filters" method="get">
+          <Input name="search" placeholder="Search title or description" defaultValue={search} className="w-[min(100%,18rem)]" />
+          <Input name="status" placeholder="Status" defaultValue={status} className="w-36" />
+          <select name="department_id" defaultValue={departmentId} className="h-11 w-52 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm">
+            <option value="">All departments</option>
+            {departments.data.map((department) => (
+              <option key={department.id} value={department.id}>
+                {department.name}
+              </option>
+            ))}
+          </select>
+          <Input name="from_date" type="date" defaultValue={fromDate} className="w-44" />
+          <Input name="to_date" type="date" defaultValue={toDate} className="w-44" />
+          <Button type="submit" variant="outline">Filter</Button>
+        </form>
         <div className="toolbar-actions">
           <Button asChild>
             <Link href="/requests/new">Create request</Link>
