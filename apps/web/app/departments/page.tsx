@@ -1,21 +1,26 @@
+import { redirect } from "next/navigation"
+
 import { AppShell } from "@/components/app-shell"
+import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { apiGet, getToken, type ApiListResponse, type DepartmentListItem, type UserListItem } from "@/lib/api"
 
-const departments = [
-  ["Finance", "FIN", "8"],
-  ["Engineering", "ENG", "14"],
-  ["Operations", "OPS", "6"],
-]
+export default async function DepartmentsPage() {
+  const token = await getToken()
+  if (!token) redirect("/login")
 
-export default function DepartmentsPage() {
+  const [departments, users] = await Promise.all([
+    apiGet<ApiListResponse<DepartmentListItem>>("/api/v1/departments?page_size=100", token),
+    apiGet<ApiListResponse<UserListItem>>("/api/v1/users?page_size=100", token),
+  ])
+
+  const countByDepartmentId = new Map<string, number>()
+  for (const user of users.data) {
+    if (!user.department_id) continue
+    countByDepartmentId.set(user.department_id, (countByDepartmentId.get(user.department_id) ?? 0) + 1)
+  }
+
   return (
     <AppShell title="Departments" description="Department setup used for requester_department approval scopes.">
       <Card>
@@ -30,14 +35,16 @@ export default function DepartmentsPage() {
                 <TableHead>Name</TableHead>
                 <TableHead>Code</TableHead>
                 <TableHead>User Count</TableHead>
+                <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {departments.map((row) => (
-                <TableRow key={row[1]}>
-                  {row.map((cell) => (
-                    <TableCell key={`${row[1]}-${cell}`}>{cell}</TableCell>
-                  ))}
+              {departments.data.map((department) => (
+                <TableRow key={department.id}>
+                  <TableCell>{department.name}</TableCell>
+                  <TableCell>{department.code || "—"}</TableCell>
+                  <TableCell>{countByDepartmentId.get(department.id) ?? 0}</TableCell>
+                  <TableCell><Badge>{department.status ?? "active"}</Badge></TableCell>
                 </TableRow>
               ))}
             </TableBody>

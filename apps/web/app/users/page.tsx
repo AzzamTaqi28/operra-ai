@@ -1,23 +1,22 @@
+import { redirect } from "next/navigation"
+
 import { AppShell } from "@/components/app-shell"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { apiGet, getToken, type ApiListResponse, type DepartmentListItem, type UserListItem } from "@/lib/api"
 
-const users = [
-  ["Siti", "siti@operra.ai", "Finance", "owner, admin", "active"],
-  ["Ari", "ari@operra.ai", "Engineering", "requester, manager", "active"],
-  ["Mira", "mira@operra.ai", "Finance", "finance", "active"],
-]
+export default async function UsersPage() {
+  const token = await getToken()
+  if (!token) redirect("/login")
 
-export default function UsersPage() {
+  const [users, departments] = await Promise.all([
+    apiGet<ApiListResponse<UserListItem>>("/api/v1/users?page_size=100", token),
+    apiGet<ApiListResponse<DepartmentListItem>>("/api/v1/departments?page_size=100", token),
+  ])
+
+  const departmentById = new Map(departments.data.map((department) => [department.id, department.name]))
+
   return (
     <AppShell title="Users" description="Tenant-scoped user administration and role assignment.">
       <div className="toolbar">
@@ -26,7 +25,6 @@ export default function UsersPage() {
           <Badge>Role</Badge>
           <Badge>Status</Badge>
         </div>
-        <Button type="button">Create user</Button>
       </div>
 
       <Card>
@@ -46,11 +44,13 @@ export default function UsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((row) => (
-                <TableRow key={row[1]}>
-                  {row.map((cell) => (
-                    <TableCell key={`${row[1]}-${cell}`}>{cell}</TableCell>
-                  ))}
+              {users.data.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>{user.name}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{user.department_id ? departmentById.get(user.department_id) ?? user.department_id.slice(0, 8) : "—"}</TableCell>
+                  <TableCell>{(user.roles ?? []).length > 0 ? (user.roles ?? []).join(", ") : "—"}</TableCell>
+                  <TableCell><Badge>{user.status}</Badge></TableCell>
                 </TableRow>
               ))}
             </TableBody>

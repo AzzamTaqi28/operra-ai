@@ -97,6 +97,7 @@ export type UserListItem = {
   email: string
   department_id?: string | null
   status: string
+  roles?: string[]
 }
 
 export type DepartmentListItem = {
@@ -104,4 +105,62 @@ export type DepartmentListItem = {
   name: string
   code: string
   status?: string
+}
+
+export type WorkflowVersionSummary = {
+  id: string
+  workflow_id: string
+  version_number: number
+  config_json: unknown
+  mermaid_diagram?: string
+  explanation?: string
+  created_by: string
+  created_at: string
+}
+
+export type WorkflowListItem = {
+  id: string
+  organization_id: string
+  name: string
+  type: string
+  status: string
+  active_version_id?: string | null
+  created_by: string
+  created_at: string
+  updated_at: string
+  active_version?: {
+    id: string
+    organization_id: string
+    workflow_id: string
+    version_number: number
+    config_json: unknown
+    mermaid_diagram?: string
+    explanation?: string
+    created_by: string
+    created_at: string
+  } | null
+}
+
+export type AuditLogItem = {
+  id: string
+  organization_id: string
+  actor_user_id?: string | null
+  action: string
+  entity_type: string
+  entity_id?: string | null
+  old_value?: unknown
+  new_value?: unknown
+  ip_address?: string | null
+  user_agent?: string | null
+  created_at: string
+}
+
+export type CurrentUser = {
+  id: string
+  organization_id: string
+  department_id?: string | null
+  name: string
+  email: string
+  roles: string[]
+  status: string
 }

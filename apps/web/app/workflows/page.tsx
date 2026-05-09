@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation"
+
 import Link from "next/link"
 
 import { AppShell } from "@/components/app-shell"
@@ -13,13 +15,18 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
+import { apiGet, getToken, type ApiListResponse, type WorkflowListItem } from "@/lib/api"
 
-const workflows = [
-  ["Purchase Request Approval", "purchase_request", "active", "v3", "2026-05-08"],
-  ["Travel Request Approval", "purchase_request", "draft", "v1", "2026-05-06"],
-]
+function versionLabel(item: WorkflowListItem) {
+  return item.active_version?.version_number ? `v${item.active_version.version_number}` : "—"
+}
 
-export default function WorkflowsPage() {
+export default async function WorkflowsPage() {
+  const token = await getToken()
+  if (!token) redirect("/login")
+
+  const workflows = await apiGet<ApiListResponse<WorkflowListItem>>("/api/v1/workflows?page_size=100", token)
+
   return (
     <AppShell title="Workflows" description="JSON-first definitions with validation, Mermaid preview, versioning, and activation.">
       <div className="toolbar">
@@ -52,11 +59,13 @@ export default function WorkflowsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {workflows.map((row) => (
-                <TableRow key={row[0]}>
-                  {row.map((cell) => (
-                    <TableCell key={`${row[0]}-${cell}`}>{cell}</TableCell>
-                  ))}
+              {workflows.data.map((workflow) => (
+                <TableRow key={workflow.id}>
+                  <TableCell>{workflow.name}</TableCell>
+                  <TableCell>{workflow.type}</TableCell>
+                  <TableCell><Badge>{workflow.status}</Badge></TableCell>
+                  <TableCell>{versionLabel(workflow)}</TableCell>
+                  <TableCell>{new Date(workflow.updated_at).toLocaleDateString("id-ID")}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
