@@ -1,48 +1,90 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
 
 import { AppShell } from "@/components/app-shell"
-import { Card, Chip, Table } from "@/components/ui"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { apiGet, getToken, type ApiListResponse, type DepartmentListItem, type PurchaseRequest, type UserListItem } from "@/lib/api"
 
-const rows = [
-  ["PR-1024", "Laptop refresh", "Siti", "Finance", "IDR 45,000,000", "in_review", "Director Approval", "2026-05-08"],
-  ["PR-1023", "Office chairs", "Ari", "People Ops", "IDR 12,500,000", "draft", "Draft", "2026-05-08"],
-  ["PR-1022", "Cloud storage", "Dina", "Engineering", "IDR 21,000,000", "revision_requested", "Manager Approval", "2026-05-07"],
-]
+function currency(amount: number, code = "IDR") {
+  return new Intl.NumberFormat("id-ID", { style: "currency", currency: code, maximumFractionDigits: 0 }).format(amount)
+}
 
-export default function RequestsPage() {
+export default async function RequestsPage() {
+  const token = await getToken()
+  if (!token) redirect("/login")
+
+  const [requests, users, departments] = await Promise.all([
+    apiGet<ApiListResponse<PurchaseRequest>>("/api/v1/purchase-requests?page_size=20", token),
+    apiGet<ApiListResponse<UserListItem>>("/api/v1/users?page_size=100", token),
+    apiGet<ApiListResponse<DepartmentListItem>>("/api/v1/departments?page_size=100", token),
+  ])
+
+  const requesterById = new Map(users.data.map((user) => [user.id, user.name]))
+  const departmentById = new Map(departments.data.map((department) => [department.id, department.name]))
+
   return (
     <AppShell title="Purchase Requests" description="Drafts, submissions, approval timelines, comments, and attachments.">
       <div className="toolbar">
         <div className="toolbar-filters">
-          <Chip>Status</Chip>
-          <Chip>Department</Chip>
-          <Chip>Date range</Chip>
-          <Chip>Search</Chip>
+          <Badge>Status</Badge>
+          <Badge>Department</Badge>
+          <Badge>Date range</Badge>
+          <Badge>Search</Badge>
         </div>
         <div className="toolbar-actions">
-          <Link href="/requests/new" className="button button-solid">
-            Create request
-          </Link>
-          <a href="/api/v1/exports/purchase-requests.csv" className="button button-outline">
-            Export CSV
-          </a>
+          <Button asChild>
+            <Link href="/requests/new">Create request</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/exports">Export CSV</Link>
+          </Button>
         </div>
       </div>
 
-      <Card title="Request list" description="Request ID, title, requester, department, amount, status, and current step.">
-        <Table
-          headers={["Request ID", "Title", "Requester", "Department", "Amount", "Status", "Current Step", "Created At"]}
-          rows={rows.map((row) => [
-            <Link key={row[0]} href={`/requests/${row[0].toLowerCase()}`}>{row[0]}</Link>,
-            row[1],
-            row[2],
-            row[3],
-            row[4],
-            row[5],
-            row[6],
-            row[7],
-          ])}
-        />
+      <Card>
+        <CardHeader>
+          <CardTitle>Request list</CardTitle>
+          <CardDescription>Request ID, title, requester, department, amount, status, and current step.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Request ID</TableHead>
+                <TableHead>Title</TableHead>
+                <TableHead>Requester</TableHead>
+                <TableHead>Department</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Current Step</TableHead>
+                <TableHead>Created At</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {requests.data.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell>
+                    <Link href={`/requests/${item.id}`} className="font-medium text-[var(--accent)] hover:underline">
+                      {item.id.slice(0, 8)}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{item.title}</TableCell>
+                  <TableCell>{requesterById.get(item.requester_id) ?? item.requester_id.slice(0, 8)}</TableCell>
+                  <TableCell>{departmentById.get(item.department_id) ?? item.department_id.slice(0, 8)}</TableCell>
+                  <TableCell>{currency(item.estimated_amount, item.currency)}</TableCell>
+                  <TableCell>
+                    <Badge>{item.status}</Badge>
+                  </TableCell>
+                  <TableCell>{item.current_step_instance_id ? item.current_step_instance_id.slice(0, 8) : "Draft"}</TableCell>
+                  <TableCell>{new Date(item.created_at).toLocaleDateString("id-ID")}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
       </Card>
     </AppShell>
   )
