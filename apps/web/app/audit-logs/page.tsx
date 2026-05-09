@@ -1,5 +1,14 @@
 import { AppShell } from "@/components/app-shell"
-import { Card, Chip, Table } from "@/components/ui"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 const logs = [
   ["2026-05-08 10:11", "Siti", "request.submitted", "purchase_request", "PR-1024"],
@@ -12,15 +21,40 @@ export default function AuditLogsPage() {
     <AppShell title="Audit Logs" description="Read-only event trail for meaningful mutations, approvals, exports, and AI generation.">
       <div className="toolbar">
         <div className="toolbar-filters">
-          <Chip>Action</Chip>
-          <Chip>Entity type</Chip>
-          <Chip>Actor</Chip>
-          <Chip>Date range</Chip>
+          <Badge>Action</Badge>
+          <Badge>Entity type</Badge>
+          <Badge>Actor</Badge>
+          <Badge>Date range</Badge>
         </div>
       </div>
 
-      <Card title="Event trail">
-        <Table headers={["Timestamp", "Actor", "Action", "Entity Type", "Entity ID"]} rows={logs.map((row) => row.map((cell) => cell))} />
+      <Card>
+        <CardHeader>
+          <CardTitle>Event trail</CardTitle>
+          <CardDescription>Mutations, approvals, exports, and AI generation events.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Timestamp</TableHead>
+                <TableHead>Actor</TableHead>
+                <TableHead>Action</TableHead>
+                <TableHead>Entity Type</TableHead>
+                <TableHead>Entity ID</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {logs.map((row) => (
+                <TableRow key={`${row[0]}-${row[4]}`}>
+                  {row.map((cell) => (
+                    <TableCell key={`${row[0]}-${cell}`}>{cell}</TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
       </Card>
     </AppShell>
   )

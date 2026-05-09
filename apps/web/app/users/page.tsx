@@ -1,5 +1,15 @@
 import { AppShell } from "@/components/app-shell"
-import { Card, Chip, Table } from "@/components/ui"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 const users = [
   ["Siti", "siti@operra.ai", "Finance", "owner, admin", "active"],
@@ -12,15 +22,40 @@ export default function UsersPage() {
     <AppShell title="Users" description="Tenant-scoped user administration and role assignment.">
       <div className="toolbar">
         <div className="toolbar-filters">
-          <Chip>Department</Chip>
-          <Chip>Role</Chip>
-          <Chip>Status</Chip>
+          <Badge>Department</Badge>
+          <Badge>Role</Badge>
+          <Badge>Status</Badge>
         </div>
-        <button className="button button-solid" type="button">Create user</button>
+        <Button type="button">Create user</Button>
       </div>
 
-      <Card title="User directory">
-        <Table headers={["Name", "Email", "Department", "Roles", "Status"]} rows={users.map((row) => row.map((cell) => cell))} />
+      <Card>
+        <CardHeader>
+          <CardTitle>User directory</CardTitle>
+          <CardDescription>Organization-scoped users and role assignments.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Department</TableHead>
+                <TableHead>Roles</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {users.map((row) => (
+                <TableRow key={row[1]}>
+                  {row.map((cell) => (
+                    <TableCell key={`${row[1]}-${cell}`}>{cell}</TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
       </Card>
     </AppShell>
   )

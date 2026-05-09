@@ -1,4 +1,6 @@
-import { Card, Field } from "@/components/ui"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 
 export default function SetupPage() {
   return (
@@ -10,17 +12,38 @@ export default function SetupPage() {
           This first-time setup screen matches the API contract for organization registration and owner user creation.
         </p>
 
-        <Card title="Register organization">
-          <div className="form-grid">
-            <Field label="Organization name"><input className="input" placeholder="Demo Company" /></Field>
-            <Field label="Organization slug"><input className="input" placeholder="demo-company" /></Field>
-            <Field label="Owner name"><input className="input" placeholder="Taqi" /></Field>
-            <Field label="Owner email"><input className="input" type="email" placeholder="taqi@example.com" /></Field>
-            <Field label="Password"><input className="input" type="password" placeholder="Choose a password" /></Field>
-          </div>
-          <div className="action-row">
-            <button className="button button-solid" type="button">Create organization</button>
-          </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Register organization</CardTitle>
+            <CardDescription>Create the first tenant and initial owner account.</CardDescription>
+          </CardHeader>
+          <CardContent className="stack">
+            <div className="form-grid">
+              <label className="field">
+                <span>Organization name</span>
+                <Input placeholder="Demo Company" />
+              </label>
+              <label className="field">
+                <span>Organization slug</span>
+                <Input placeholder="demo-company" />
+              </label>
+              <label className="field">
+                <span>Owner name</span>
+                <Input placeholder="Taqi" />
+              </label>
+              <label className="field">
+                <span>Owner email</span>
+                <Input type="email" placeholder="taqi@example.com" />
+              </label>
+              <label className="field">
+                <span>Password</span>
+                <Input type="password" placeholder="Choose a password" />
+              </label>
+            </div>
+            <div className="action-row">
+              <Button type="button">Create organization</Button>
+            </div>
+          </CardContent>
         </Card>
       </section>
     </main>

@@ -1,27 +1,66 @@
 import { AppShell } from "@/components/app-shell"
-import { Card, Field } from "@/components/ui"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 
 export default function NewRequestPage() {
   return (
     <AppShell title="Create Purchase Request" description="Save a draft or submit directly into the approval workflow.">
-      <Card title="Request form" description="Attachment upload, comments, and submission are part of the same operational flow.">
-        <div className="form-grid">
-          <Field label="Title"><input className="input" placeholder="Buy laptops for new engineers" /></Field>
-          <Field label="Department"><input className="input" placeholder="Engineering" /></Field>
-          <Field label="Item name"><input className="input" placeholder="Laptop" /></Field>
-          <Field label="Quantity"><input className="input" type="number" placeholder="3" /></Field>
-          <Field label="Estimated amount"><input className="input" type="number" placeholder="45000000" /></Field>
-          <Field label="Currency"><input className="input" placeholder="IDR" /></Field>
-          <Field label="Urgency"><input className="input" placeholder="high" /></Field>
-          <Field label="Expected date"><input className="input" type="date" /></Field>
-          <Field label="Vendor name optional"><input className="input" placeholder="Vendor ABC" /></Field>
-          <Field label="Notes optional"><textarea className="textarea" placeholder="Prefer business warranty" /></Field>
-        </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Request form</CardTitle>
+          <CardDescription>Attachment upload, comments, and submission are part of the same operational flow.</CardDescription>
+        </CardHeader>
+        <CardContent className="stack">
+          <div className="form-grid">
+            <label className="field">
+              <span>Title</span>
+              <Input placeholder="Buy laptops for new engineers" />
+            </label>
+            <label className="field">
+              <span>Department</span>
+              <Input placeholder="Engineering" />
+            </label>
+            <label className="field">
+              <span>Item name</span>
+              <Input placeholder="Laptop" />
+            </label>
+            <label className="field">
+              <span>Quantity</span>
+              <Input type="number" placeholder="3" />
+            </label>
+            <label className="field">
+              <span>Estimated amount</span>
+              <Input type="number" placeholder="45000000" />
+            </label>
+            <label className="field">
+              <span>Currency</span>
+              <Input placeholder="IDR" />
+            </label>
+            <label className="field">
+              <span>Urgency</span>
+              <Input placeholder="high" />
+            </label>
+            <label className="field">
+              <span>Expected date</span>
+              <Input type="date" />
+            </label>
+            <label className="field">
+              <span>Vendor name optional</span>
+              <Input placeholder="Vendor ABC" />
+            </label>
+            <label className="field">
+              <span>Notes optional</span>
+              <Textarea placeholder="Prefer business warranty" />
+            </label>
+          </div>
 
-        <div className="action-row">
-          <button className="button button-outline" type="button">Save draft</button>
-          <button className="button button-solid" type="button">Submit request</button>
-        </div>
+          <div className="action-row">
+            <Button type="button" variant="outline">Save draft</Button>
+            <Button type="button">Submit request</Button>
+          </div>
+        </CardContent>
       </Card>
     </AppShell>
   )

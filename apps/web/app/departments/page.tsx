@@ -1,5 +1,13 @@
 import { AppShell } from "@/components/app-shell"
-import { Card, Table } from "@/components/ui"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 const departments = [
   ["Finance", "FIN", "8"],
@@ -10,8 +18,31 @@ const departments = [
 export default function DepartmentsPage() {
   return (
     <AppShell title="Departments" description="Department setup used for requester_department approval scopes.">
-      <Card title="Department management">
-        <Table headers={["Name", "Code", "User Count"]} rows={departments.map((row) => row.map((cell) => cell))} />
+      <Card>
+        <CardHeader>
+          <CardTitle>Department management</CardTitle>
+          <CardDescription>Departments are used in request routing and access rules.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Code</TableHead>
+                <TableHead>User Count</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {departments.map((row) => (
+                <TableRow key={row[1]}>
+                  {row.map((cell) => (
+                    <TableCell key={`${row[1]}-${cell}`}>{cell}</TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
       </Card>
     </AppShell>
   )
