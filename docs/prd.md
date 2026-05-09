@@ -7,10 +7,10 @@
 | Product | Operra |
 | Version | v0.1 |
 | Status | Draft for implementation |
-| Owner | Taqi |
+| Owner | Operra Team |
 | Primary user segment | Growing companies with messy internal approvals |
 | First workflow | Purchase Request approval |
-| Deployment model | Self-hosted with Docker Compose, managed hosting later |
+| Deployment model | Self-hosted with Docker Compose |
 | AI scope | Workflow generation assistance only |
 
 ## 1. Product summary
@@ -107,7 +107,7 @@ Needs read-only access to requests, attachments, approval history, audit logs, a
 | File storage | S3-compatible from day one |
 | Local/self-hosted storage | MinIO included in Docker Compose |
 | AI | Included in v0.1 for workflow generation only |
-| Launch path | Private beta first, OSS after private beta |
+| Launch path | OSS with a self-hosted deployment first |
 | First workflow | Purchase Request approval |
 | Export | CSV export required in v0.1 |
 
@@ -518,8 +518,7 @@ Minimum frontend screens:
 - 10 user interviews completed.
 - 3 design partners interested.
 - 1 real company tests a pilot workflow.
-- 1 paid pilot secured.
-- OSS launch happens after private beta.
+- Public OSS release is ready.
 
 ## 16. Acceptance checklist
 

@@ -130,7 +130,7 @@ Minimum UI tests:
 
 ## 6. Manual acceptance tests
 
-Before private beta, manually test:
+Before release, manually test:
 
 1. Fresh `docker compose up -d` works.
 2. Register organization.

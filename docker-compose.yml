@@ -4,8 +4,8 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-operra}
-      POSTGRES_USER: ${POSTGRES_USER:-operra}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-operra}
+      POSTGRES_USER: ${POSTGRES_USER:-your-db-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
     ports:
       - "5432:5432"
     volumes:
@@ -16,8 +16,8 @@ services:
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-operra}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-operra-secret}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-your-minio-user}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-change-me}
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -32,13 +32,13 @@ services:
       APP_ENV: ${APP_ENV:-development}
       APP_URL: ${APP_URL:-http://localhost:3000}
       API_URL: ${API_URL:-http://localhost:8080}
-      DATABASE_URL: ${DATABASE_URL:-postgres://operra:operra@postgres:5432/operra?sslmode=disable}
-      JWT_SECRET: ${JWT_SECRET:-change-me-please}
+      DATABASE_URL: ${DATABASE_URL:-postgres://your-db-user:your-db-password@postgres:5432/operra?sslmode=disable}
+      JWT_SECRET: ${JWT_SECRET:-change-me}
       STORAGE_DRIVER: ${STORAGE_DRIVER:-s3}
       S3_ENDPOINT: ${S3_ENDPOINT:-http://minio:9000}
       S3_BUCKET: ${S3_BUCKET:-operra}
-      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-operra}
-      S3_SECRET_KEY: ${S3_SECRET_KEY:-operra-secret}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-your-s3-access-key}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-change-me}
       S3_REGION: ${S3_REGION:-us-east-1}
       S3_FORCE_PATH_STYLE: ${S3_FORCE_PATH_STYLE:-true}
       AI_PROVIDER: ${AI_PROVIDER:-openai}

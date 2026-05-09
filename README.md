@@ -8,18 +8,25 @@ Version v0.1 focuses on AI-assisted Purchase Request approval.
 
 ```text
 operra/
-  AGENTS.md
+  CONTRIBUTING.md
+  CODE_OF_CONDUCT.md
+  CHANGELOG.md
+  LICENSE
+  SECURITY.md
+  SUPPORT.md
   README.md
   .env.example
   apps/
     api/
     web/
   docs/
+    roadmap.md
+    releases.md
 ```
 
 ## Current Scope
 
-This repository is being initialized following the project docs and Codex task plan.
+This repository follows the public docs, roadmap, and contributor guidance.
 
 Initial setup targets:
 
@@ -39,4 +46,43 @@ Read these in order before implementing features:
 6. `docs/security.md`
 7. `docs/testing.md`
 
-Use `docs/codex-task-plan.md` as the implementation sequence.
+Use `docs/roadmap.md` as the public implementation overview.
+
+Use `CONTRIBUTING.md` for contribution guidelines.
+
+See `CODE_OF_CONDUCT.md` for community standards.
+
+See `LICENSE` for the project license.
+
+See `SECURITY.md` for vulnerability reporting.
+
+See `SUPPORT.md` for help and issue guidance.
+
+See `CHANGELOG.md` for release notes.
+
+See `docs/releases.md` for public release highlights.
+
+Workflow chart:
+
+- `docs/workflow-chart.md`
+
+## Workflow Overview
+
+```mermaid
+flowchart LR
+  A[Docs + Roadmap] --> B[Backend]
+  A --> C[Frontend]
+  B --> D[PostgreSQL]
+  B --> E[MinIO / S3]
+  C --> F[Login / Setup]
+  C --> G[Dashboard / Requests]
+  C --> H[Workflows / AI Builder]
+  C --> I[Users / Departments / Audit / Exports]
+  G --> J[Submit Request]
+  J --> K[Workflow Engine]
+  K --> L[Approvals]
+  L --> M[Audit Log]
+  M --> N[CSV Export]
+```
+
+For the detailed repo and app flow, see `docs/workflow-chart.md`.

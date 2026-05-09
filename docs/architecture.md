@@ -51,7 +51,7 @@ Suggested structure:
 
 ```text
 operra/
-  AGENTS.md
+  CONTRIBUTING.md
   README.md
   docker-compose.yml
   .env.example
@@ -59,13 +59,14 @@ operra/
     prd.md
     architecture.md
     workflow-engine.md
+    workflow-chart.md
+    roadmap.md
     data-model.md
     api.md
     ui.md
     deployment.md
     security.md
     testing.md
-    codex-task-plan.md
   apps/
     api/
       cmd/
@@ -393,14 +394,14 @@ Minimum environment variables:
 APP_ENV=development
 APP_URL=http://localhost:3000
 API_URL=http://localhost:8080
-DATABASE_URL=postgres://operra:operra@postgres:5432/operra?sslmode=disable
+DATABASE_URL=postgres://your-db-user:your-db-password@postgres:5432/operra?sslmode=disable
 JWT_SECRET=change-me
 
 STORAGE_DRIVER=s3
 S3_ENDPOINT=http://minio:9000
 S3_BUCKET=operra
-S3_ACCESS_KEY=operra
-S3_SECRET_KEY=operra-secret
+S3_ACCESS_KEY=your-s3-access-key
+S3_SECRET_KEY=change-me
 S3_REGION=us-east-1
 S3_FORCE_PATH_STYLE=true
 

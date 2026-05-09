@@ -35,8 +35,8 @@ services:
     image: postgres:16
     environment:
       POSTGRES_DB: operra
-      POSTGRES_USER: operra
-      POSTGRES_PASSWORD: operra
+      POSTGRES_USER: your-db-user
+      POSTGRES_PASSWORD: change-me
     ports:
       - "5432:5432"
     volumes:
@@ -46,8 +46,8 @@ services:
     image: minio/minio:latest
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: operra
-      MINIO_ROOT_PASSWORD: operra-secret
+      MINIO_ROOT_USER: your-minio-user
+      MINIO_ROOT_PASSWORD: change-me
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -89,14 +89,14 @@ APP_ENV=development
 APP_URL=http://localhost:3000
 API_URL=http://localhost:8080
 
-DATABASE_URL=postgres://operra:operra@postgres:5432/operra?sslmode=disable
-JWT_SECRET=change-me-please
+DATABASE_URL=postgres://your-db-user:your-db-password@postgres:5432/operra?sslmode=disable
+JWT_SECRET=change-me
 
 STORAGE_DRIVER=s3
 S3_ENDPOINT=http://minio:9000
 S3_BUCKET=operra
-S3_ACCESS_KEY=operra
-S3_SECRET_KEY=operra-secret
+S3_ACCESS_KEY=your-s3-access-key
+S3_SECRET_KEY=change-me
 S3_REGION=us-east-1
 S3_FORCE_PATH_STYLE=true
 
@@ -139,7 +139,7 @@ make seed
 
 If using GORM AutoMigrate during early development, add a note:
 
-> AutoMigrate is allowed during early dev, but real migrations are required before private beta.
+> AutoMigrate is allowed during early dev, but real migrations are required before release.
 
 ## 7. Health checks
 

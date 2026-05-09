@@ -71,9 +71,9 @@ Request:
 {
   "organization_name": "Demo Company",
   "organization_slug": "demo-company",
-  "owner_name": "Taqi",
-  "owner_email": "taqi@example.com",
-  "password": "secret-password"
+  "owner_name": "Owner Name",
+  "owner_email": "owner@example.com",
+  "password": "change-me"
 }
 ```
 
@@ -89,8 +89,8 @@ Response:
     },
     "user": {
       "id": "uuid",
-      "name": "Taqi",
-      "email": "taqi@example.com"
+      "name": "Owner Name",
+      "email": "owner@example.com"
     },
     "token": "jwt-token"
   }
@@ -103,8 +103,8 @@ Request:
 
 ```json
 {
-  "email": "taqi@example.com",
-  "password": "secret-password"
+  "email": "owner@example.com",
+  "password": "change-me"
 }
 ```
 
@@ -117,8 +117,8 @@ Response:
     "user": {
       "id": "uuid",
       "organization_id": "uuid",
-      "name": "Taqi",
-      "email": "taqi@example.com",
+      "name": "Owner Name",
+      "email": "owner@example.com",
       "roles": ["owner"]
     }
   }
