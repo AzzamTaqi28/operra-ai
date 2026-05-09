@@ -4,12 +4,14 @@ import Link from "next/link"
 const navItems = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/requests", label: "Requests" },
+  { href: "/approvals", label: "Pending Approvals" },
   { href: "/workflows", label: "Workflows" },
   { href: "/ai-workflow", label: "AI Builder" },
   { href: "/users", label: "Users" },
   { href: "/departments", label: "Departments" },
   { href: "/audit-logs", label: "Audit Logs" },
   { href: "/exports", label: "Exports" },
+  { href: "/settings", label: "Settings" },
 ]
 
 export function AppShell({ title, description, children }: Readonly<{ title: string; description?: string; children: ReactNode }>) {

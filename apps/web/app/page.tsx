@@ -1,3 +1,5 @@
+import Link from "next/link"
+
 const highlights = [
   "Multi-tenant organization scoping",
   "Role-based approvals",
@@ -24,8 +26,8 @@ export default function HomePage() {
             ))}
           </ul>
           <div style={{ display: "flex", gap: 12, marginTop: 20, flexWrap: "wrap" }}>
-            <a className="nav-link" href="/dashboard">Open dashboard</a>
-            <a className="nav-link" href="/login">Login route</a>
+            <Link className="nav-link" href="/dashboard">Open dashboard</Link>
+            <Link className="nav-link" href="/login">Login route</Link>
           </div>
         </div>
       </section>

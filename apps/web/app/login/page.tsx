@@ -1,21 +1,27 @@
 import Link from "next/link"
 
+import { Card, Field } from "@/components/ui"
+
 export default function LoginPage() {
   return (
     <main className="page-shell">
-      <section className="hero">
+      <section className="hero narrow">
         <p className="eyebrow">Operra access</p>
         <h1>Sign in to manage approvals.</h1>
         <p className="lede">
-          This route is ready for the app login flow. The first implementation pass keeps the UI shell in place while the API integration is connected.
+          Purchase request flow, approvals, audit logs, and exports all sit behind tenant-scoped authentication.
         </p>
-        <div className="panel">
-          <h2>Next step</h2>
-          <p className="muted-copy">Connect this form to the `/api/v1/auth/login` endpoint and persist the JWT for protected routes.</p>
-          <Link href="/dashboard" className="nav-link" style={{ display: "inline-flex", marginTop: 16 }}>
-            Continue to dashboard
-          </Link>
-        </div>
+
+        <Card title="Login">
+          <div className="form-grid">
+            <Field label="Email"><input className="input" type="email" placeholder="taqi@example.com" /></Field>
+            <Field label="Password"><input className="input" type="password" placeholder="••••••••" /></Field>
+          </div>
+          <div className="action-row">
+            <button className="button button-solid" type="button">Login</button>
+            <Link className="button button-outline" href="/setup">First-time setup</Link>
+          </div>
+        </Card>
       </section>
     </main>
   )
