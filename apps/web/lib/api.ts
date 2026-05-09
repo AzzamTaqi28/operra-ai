@@ -82,6 +82,13 @@ export type PurchaseRequestDetail = PurchaseRequest & {
   }>
 }
 
+export type PurchaseRequestComment = {
+  id: string
+  actor_user_id: string
+  body: string
+  created_at: string
+}
+
 export type ApprovalQueueItem = {
   request_id: string
   step_id: string
@@ -105,6 +112,39 @@ export type DepartmentListItem = {
   name: string
   code: string
   status?: string
+}
+
+export type ApprovalActionResult = {
+  purchase_request_id: string
+  approval_step_instance_id: string
+  action: string
+  status: string
+  current_step_instance_id?: string | null
+  completed_at?: string | null
+}
+
+export type WorkflowGenerationResult = {
+  workflow_json: {
+    name: string
+    type: string
+    version: number
+    steps: unknown[]
+    [key: string]: unknown
+  }
+  explanation: string
+  mermaid_diagram: string
+  validation: {
+    valid: boolean
+    errors: unknown[]
+  }
+  warnings: string[]
+  provider: string
+  model?: string
+}
+
+export type WorkflowCreateResponse = {
+  workflow: WorkflowListItem
+  version: WorkflowVersionSummary
 }
 
 export type WorkflowVersionSummary = {

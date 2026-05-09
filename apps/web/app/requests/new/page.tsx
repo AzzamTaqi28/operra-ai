@@ -1,10 +1,16 @@
-import { AppShell } from "@/components/app-shell"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { redirect } from "next/navigation"
 
-export default function NewRequestPage() {
+import { AppShell } from "@/components/app-shell"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { NewRequestForm } from "@/components/new-request-form"
+import { apiGet, getToken, type ApiListResponse, type DepartmentListItem } from "@/lib/api"
+
+export default async function NewRequestPage() {
+  const token = await getToken()
+  if (!token) redirect("/login")
+
+  const departments = await apiGet<ApiListResponse<DepartmentListItem>>("/api/v1/departments?page_size=100", token)
+
   return (
     <AppShell title="Create Purchase Request" description="Save a draft or submit directly into the approval workflow.">
       <Card>
@@ -13,53 +19,7 @@ export default function NewRequestPage() {
           <CardDescription>Attachment upload, comments, and submission are part of the same operational flow.</CardDescription>
         </CardHeader>
         <CardContent className="stack">
-          <div className="form-grid">
-            <label className="field">
-              <span>Title</span>
-              <Input placeholder="Buy laptops for new engineers" />
-            </label>
-            <label className="field">
-              <span>Department</span>
-              <Input placeholder="Engineering" />
-            </label>
-            <label className="field">
-              <span>Item name</span>
-              <Input placeholder="Laptop" />
-            </label>
-            <label className="field">
-              <span>Quantity</span>
-              <Input type="number" placeholder="3" />
-            </label>
-            <label className="field">
-              <span>Estimated amount</span>
-              <Input type="number" placeholder="45000000" />
-            </label>
-            <label className="field">
-              <span>Currency</span>
-              <Input placeholder="IDR" />
-            </label>
-            <label className="field">
-              <span>Urgency</span>
-              <Input placeholder="high" />
-            </label>
-            <label className="field">
-              <span>Expected date</span>
-              <Input type="date" />
-            </label>
-            <label className="field">
-              <span>Vendor name optional</span>
-              <Input placeholder="Vendor ABC" />
-            </label>
-            <label className="field">
-              <span>Notes optional</span>
-              <Textarea placeholder="Prefer business warranty" />
-            </label>
-          </div>
-
-          <div className="action-row">
-            <Button type="button" variant="outline">Save draft</Button>
-            <Button type="button">Submit request</Button>
-          </div>
+          <NewRequestForm departments={departments.data} />
         </CardContent>
       </Card>
     </AppShell>

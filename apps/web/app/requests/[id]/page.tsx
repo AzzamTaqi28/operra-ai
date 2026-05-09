@@ -2,16 +2,17 @@ import { redirect } from "next/navigation"
 
 import { AppShell } from "@/components/app-shell"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { RequestActionPanel } from "@/components/request-action-panel"
+import { RequestCommentForm } from "@/components/request-comment-form"
 import {
   apiGet,
   getToken,
   type ApiListResponse,
   type DepartmentListItem,
   type PurchaseRequestDetail,
+  type PurchaseRequestComment,
   type UserListItem,
 } from "@/lib/api"
 
@@ -27,10 +28,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
 
   const [detail, comments, users, departments] = await Promise.all([
     apiGet<{ data: PurchaseRequestDetail }>(`/api/v1/purchase-requests/${id}`, token),
-    apiGet<{ data: Array<{ id: string; actor_user_id: string; body: string; created_at: string }> }>(
-      `/api/v1/purchase-requests/${id}/comments`,
-      token,
-    ).catch(() => ({ data: [] })),
+    apiGet<{ data: PurchaseRequestComment[] }>(`/api/v1/purchase-requests/${id}/comments`, token).catch(() => ({ data: [] })),
     apiGet<ApiListResponse<UserListItem>>("/api/v1/users?page_size=100", token),
     apiGet<ApiListResponse<DepartmentListItem>>("/api/v1/departments?page_size=100", token),
   ])
@@ -63,12 +61,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
             <CardDescription>Approver controls stay compact and explicit.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
-            <Textarea placeholder="Approved. Proceed." />
-            <div className="flex flex-wrap gap-3">
-              <Button type="button">Approve</Button>
-              <Button type="button" variant="outline">Reject</Button>
-              <Button type="button" variant="outline">Request revision</Button>
-            </div>
+            <RequestActionPanel requestId={item.id} />
           </CardContent>
         </Card>
       </div>
@@ -170,7 +163,8 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
           <CardHeader>
             <CardTitle>Comments</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="grid gap-4">
+            <RequestCommentForm requestId={item.id} />
             {comments.data.length === 0 ? (
               <p className="text-sm text-slate-500">No comments yet.</p>
             ) : (
