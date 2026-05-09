@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation"
+import Link from "next/link"
 
 import { AppShell } from "@/components/app-shell"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { apiGet, getToken, type ApiListResponse, type DepartmentListItem, type UserListItem } from "@/lib/api"
@@ -41,6 +43,7 @@ export default async function UsersPage() {
                 <TableHead>Department</TableHead>
                 <TableHead>Roles</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -51,6 +54,11 @@ export default async function UsersPage() {
                   <TableCell>{user.department_id ? departmentById.get(user.department_id) ?? user.department_id.slice(0, 8) : "—"}</TableCell>
                   <TableCell>{(user.roles ?? []).length > 0 ? (user.roles ?? []).join(", ") : "—"}</TableCell>
                   <TableCell><Badge>{user.status}</Badge></TableCell>
+                  <TableCell>
+                    <Button asChild variant="outline" size="sm">
+                      <Link href={`/users/${user.id}`}>Edit</Link>
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

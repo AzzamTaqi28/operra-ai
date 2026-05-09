@@ -56,6 +56,7 @@ export default async function WorkflowsPage() {
                 <TableHead>Status</TableHead>
                 <TableHead>Active Version</TableHead>
                 <TableHead>Updated At</TableHead>
+                <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -66,6 +67,11 @@ export default async function WorkflowsPage() {
                   <TableCell><Badge>{workflow.status}</Badge></TableCell>
                   <TableCell>{versionLabel(workflow)}</TableCell>
                   <TableCell>{new Date(workflow.updated_at).toLocaleDateString("id-ID")}</TableCell>
+                  <TableCell>
+                    <Button asChild variant="outline" size="sm">
+                      <Link href={`/workflows/${workflow.id}`}>Edit</Link>
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation"
+import Link from "next/link"
 
 import { AppShell } from "@/components/app-shell"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { apiGet, getToken, type ApiListResponse, type DepartmentListItem, type UserListItem } from "@/lib/api"
@@ -36,6 +38,7 @@ export default async function DepartmentsPage() {
                 <TableHead>Code</TableHead>
                 <TableHead>User Count</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -45,6 +48,11 @@ export default async function DepartmentsPage() {
                   <TableCell>{department.code || "—"}</TableCell>
                   <TableCell>{countByDepartmentId.get(department.id) ?? 0}</TableCell>
                   <TableCell><Badge>{department.status ?? "active"}</Badge></TableCell>
+                  <TableCell>
+                    <Button asChild variant="outline" size="sm">
+                      <Link href={`/departments/${department.id}`}>Edit</Link>
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
