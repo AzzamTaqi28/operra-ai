@@ -15,7 +15,7 @@ export default function ExportsPage() {
           </CardHeader>
           <CardContent>
             <Button asChild>
-              <Link href="/api/v1/exports/purchase-requests.csv">Download purchase requests CSV</Link>
+              <Link href="/api/exports/purchase-requests.csv">Download purchase requests CSV</Link>
             </Button>
           </CardContent>
         </Card>
@@ -26,7 +26,7 @@ export default function ExportsPage() {
           </CardHeader>
           <CardContent>
             <Button asChild variant="outline">
-              <Link href="/api/v1/exports/approval-history.csv">Download approval history CSV</Link>
+              <Link href="/api/exports/approval-history.csv">Download approval history CSV</Link>
             </Button>
           </CardContent>
         </Card>
@@ -37,7 +37,7 @@ export default function ExportsPage() {
           </CardHeader>
           <CardContent>
             <Button asChild variant="outline">
-              <Link href="/api/v1/exports/audit-logs.csv">Download audit logs CSV</Link>
+              <Link href="/api/exports/audit-logs.csv">Download audit logs CSV</Link>
             </Button>
           </CardContent>
         </Card>
