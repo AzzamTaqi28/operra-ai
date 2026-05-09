@@ -26,7 +26,7 @@ Operra v0.1 is focused on:
 - JSON-first workflow configuration
 - AI-assisted workflow generation
 - Auditability and CSV exports
-- S3-compatible attachment storage
+- S3-compatible attachment storage with authenticated backend downloads
 - Docker Compose deployment
 
 ## Near-term improvements

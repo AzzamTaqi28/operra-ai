@@ -33,6 +33,7 @@ What this means:
 - Docs define the product, architecture, data model, and constraints.
 - The roadmap turns those docs into a public build overview.
 - The backend owns tenancy, permissions, workflow execution, and audit rules.
+- Attachment downloads are served through authenticated backend checks in v0.1.
 - The frontend is a thin operational layer over the API.
 - Docker Compose ties the stack together for local and self-hosted use.
 

@@ -446,9 +446,11 @@ Response:
 
 ### GET /api/v1/purchase-requests/{id}/attachments/{attachment_id}/download
 
-Returns signed URL or streams file after permission check.
+Returns the attachment through an authenticated backend stream after permission checks.
 
-Recommended response if signed URL:
+Future versions may optionally return a short-lived signed URL.
+
+Recommended response if a signed URL is used:
 
 ```json
 {

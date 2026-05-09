@@ -96,8 +96,9 @@ Attachment rules:
 - File metadata stored in database.
 - File content stored in S3-compatible storage.
 - Do not expose public object URLs.
-- Use signed URLs or authenticated download endpoints.
-- Check organization and request permission before download.
+- v0.1 must use authenticated backend streaming for downloads.
+- Future versions may optionally add short-lived signed URLs.
+- Before serving or generating access, check organization and request permission.
 - Limit maximum file size.
 - Restrict dangerous file types if needed.
 - Sanitize filenames.
