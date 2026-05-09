@@ -1,15 +1,17 @@
 # Operra API Contract
 
-## 1. API principles
+This document defines the public REST contract for Operra v0.1.
 
-- REST API first.
-- JSON request and response bodies.
-- Base path: `/api/v1`.
-- Authenticated endpoints require bearer token or secure session.
-- Every tenant-owned response must be scoped by organization.
-- Backend is the authority for permissions.
+## Overview
 
-## 2. Common response formats
+- REST API first
+- JSON request and response bodies
+- Base path: `/api/v1`
+- Authenticated endpoints require a bearer token or secure session
+- Every tenant-owned response must be scoped by organization
+- The backend is the authority for permissions
+
+## Response formats
 
 ### Success object
 
@@ -44,26 +46,26 @@
 }
 ```
 
-## 3. Error codes
+## Error codes
 
-```text
-UNAUTHORIZED
-FORBIDDEN
-NOT_FOUND
-VALIDATION_ERROR
-CONFLICT
-WORKFLOW_INVALID
-WORKFLOW_TRANSITION_INVALID
-STORAGE_ERROR
-AI_PROVIDER_ERROR
-INTERNAL_ERROR
-```
+| Code | Meaning |
+|---|---|
+| `UNAUTHORIZED` | Missing or invalid authentication |
+| `FORBIDDEN` | Authenticated but not allowed |
+| `NOT_FOUND` | Resource does not exist in the tenant scope |
+| `VALIDATION_ERROR` | Request body or query validation failed |
+| `CONFLICT` | State conflict or duplicate resource |
+| `WORKFLOW_INVALID` | Workflow JSON failed validation |
+| `WORKFLOW_TRANSITION_INVALID` | Request state transition is not allowed |
+| `STORAGE_ERROR` | Attachment storage or retrieval failed |
+| `AI_PROVIDER_ERROR` | AI provider request failed |
+| `INTERNAL_ERROR` | Unexpected server error |
 
-## 4. Auth endpoints
+## Authentication
 
 ### POST /api/v1/auth/register-organization
 
-Creates organization and initial owner user.
+Creates the first organization and owner user.
 
 Request:
 
@@ -129,7 +131,7 @@ Response:
 
 Returns current user.
 
-## 5. Organization endpoints
+## Organization endpoints
 
 ### GET /api/v1/organization
 
@@ -139,7 +141,7 @@ Returns current organization.
 
 Owner/admin updates organization settings.
 
-## 6. User endpoints
+## User endpoints
 
 ### GET /api/v1/users
 
@@ -190,7 +192,7 @@ Request:
 
 Remove role.
 
-## 7. Department endpoints
+## Department endpoints
 
 ### GET /api/v1/departments
 
@@ -209,7 +211,7 @@ Request:
 
 ### DELETE /api/v1/departments/{id}
 
-## 8. Workflow endpoints
+## Workflow endpoints
 
 ### GET /api/v1/workflows
 

@@ -1,14 +1,14 @@
 # Operra Workflow Engine
 
-## 1. Purpose
+This document explains how Operra validates and executes purchase request workflows.
 
-The workflow engine is the core of Operra.
+## Purpose
 
-It must execute approval workflows deterministically based on JSON configuration.
+The workflow engine is the authority for execution. It must process approval workflows deterministically from JSON configuration.
 
-AI can generate workflow config, but the engine must validate and execute the workflow. The engine is the authority, not the AI model.
+AI-generated config must still pass backend validation.
 
-## 2. Core concepts
+## Core concepts
 
 ### Workflow
 
@@ -32,7 +32,7 @@ A runtime instance of a workflow step attached to a specific request.
 
 An action taken by an approver: approve, reject, request revision, or process.
 
-## 3. Workflow config schema
+## Workflow config schema
 
 Initial v0.1 config shape:
 
@@ -53,7 +53,7 @@ Initial v0.1 config shape:
 }
 ```
 
-## 4. Step fields
+## Step fields
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
@@ -64,7 +64,7 @@ Initial v0.1 config shape:
 | required | boolean | yes | v0.1 should treat all steps as required if included |
 | condition | object | no | Condition to determine if step applies |
 
-## 5. Supported scopes
+## Supported scopes
 
 ### organization
 
@@ -74,7 +74,7 @@ Any user with the required role in the same organization can act.
 
 Only users with the required role in the requester's department can act.
 
-## 6. Supported condition operators
+## Supported condition operators
 
 v0.1 supports simple conditions only.
 
@@ -98,7 +98,7 @@ department_id
 
 Do not implement nested boolean logic in v0.1 unless necessary.
 
-## 7. Default purchase request workflow
+## Default purchase request workflow
 
 ```json
 {
@@ -148,7 +148,7 @@ Do not implement nested boolean logic in v0.1 unless necessary.
 }
 ```
 
-## 8. Request state machine
+## Request state machine
 
 Request statuses:
 
@@ -187,7 +187,7 @@ Notes:
 - Rejected is terminal in v0.1.
 - Completed is terminal in v0.1.
 
-## 9. Approval step statuses
+## Approval step statuses
 
 ```text
 pending
@@ -227,17 +227,17 @@ revision_requested
 skipped
 ```
 
-## 10. Approver resolution
+## Approver resolution
 
 To determine whether a user can act on a step:
 
 1. User organization must match request organization.
 2. User must have the step's `approver_role`.
-3. If step scope is `requester_department`, user department must match requester's department or request department.
+3. If step scope is `requester_department`, the user must belong to the requester's department.
 4. User cannot approve their own request in v0.1.
 5. Request must be at the current actionable step.
 
-## 11. Approval actions
+## Approval actions
 
 ### Approve
 
@@ -302,7 +302,7 @@ Simpler v0.1 rule:
 
 > Revision resubmission restarts approval from step 1.
 
-## 12. Procurement processing step
+## Procurement processing step
 
 In v0.1, procurement processing can be modeled as a workflow step assigned to role `procurement`.
 
@@ -313,7 +313,7 @@ Recommended for v0.1:
 - Use normal approve action for procurement step.
 - When procurement step is approved, request becomes `completed`.
 
-## 13. Workflow validation rules
+## Workflow validation rules
 
 Backend must validate workflow JSON before saving.
 
@@ -331,7 +331,7 @@ Validation rules:
 - Condition values must match expected field type.
 - Workflow must produce at least one applicable step for common request examples.
 
-## 14. Mermaid diagram generation
+## Mermaid diagram generation
 
 Generate a Mermaid flowchart from workflow config.
 
@@ -352,7 +352,7 @@ flowchart TD
 
 For v0.1, a simpler linear diagram with condition labels is acceptable.
 
-## 15. AI-generated workflows
+## AI-generated workflows
 
 AI generated config must follow the same validation as manually written config.
 
@@ -374,7 +374,7 @@ Backend must:
 - Return validation errors if invalid.
 - Require admin confirmation before saving.
 
-## 16. Audit requirements
+## Audit requirements
 
 Workflow engine actions must create audit logs:
 
@@ -387,7 +387,7 @@ Workflow engine actions must create audit logs:
 - Revision requested.
 - Request completed.
 
-## 17. Test cases
+## Test cases
 
 Minimum workflow tests:
 

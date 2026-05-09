@@ -2,7 +2,7 @@
 
 This document shows how the repository is organized and how the app is used end to end.
 
-## 1. Repo Implementation Workflow
+## Repo Workflow
 
 Operra follows the public roadmap in `docs/roadmap.md`:
 
@@ -36,7 +36,7 @@ What this means:
 - The frontend is a thin operational layer over the API.
 - Docker Compose ties the stack together for local and self-hosted use.
 
-## 2. App Usage Workflow
+## App Usage
 
 This is the main user journey in v0.1:
 
@@ -63,7 +63,7 @@ flowchart TD
   R --> S[Export CSV or review audit logs]
 ```
 
-## 3. Runtime Component Flow
+## Runtime Flow
 
 This is how a request moves through the system:
 
@@ -84,7 +84,7 @@ sequenceDiagram
   W-->>U: Updated UI state
 ```
 
-## 4. Request State Flow
+## Request State Flow
 
 The backend uses the request lifecycle defined in `docs/workflow-engine.md`:
 
@@ -104,7 +104,7 @@ Notes:
 - Approvers are resolved by role, organization, and step scope.
 - AI can propose workflow JSON, but the backend validates and executes it.
 
-## 5. How To Read The Repo
+## How To Read The Repo
 
 - Start with `docs/prd.md` for product intent.
 - Use `docs/architecture.md` for system shape.

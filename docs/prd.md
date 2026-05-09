@@ -1,5 +1,7 @@
 # PRD - Operra v0.1: AI-Assisted Purchase Request Approval
 
+This document defines the public product scope for Operra v0.1.
+
 ## Document metadata
 
 | Field | Value |

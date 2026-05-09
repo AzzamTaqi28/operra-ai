@@ -1,6 +1,8 @@
 # Operra Testing Plan
 
-## 1. Testing goals
+This document describes the test coverage expected for Operra v0.1.
+
+## Testing goals
 
 v0.1 must prove:
 
@@ -11,7 +13,7 @@ v0.1 must prove:
 - CSV exports are correct and audited.
 - AI output is validated before saving.
 
-## 2. Backend unit tests
+## Backend unit tests
 
 ### Workflow validator
 
@@ -48,7 +50,7 @@ Test cases:
 7. Request revision marks request revision_requested.
 8. Resubmission restarts approval.
 
-## 3. Permission tests
+## Permission tests
 
 Test cases:
 
@@ -61,7 +63,7 @@ Test cases:
 7. Auditor cannot approve or edit.
 8. Admin can manage workflows.
 
-## 4. API integration tests
+## API integration tests
 
 Critical flows:
 
@@ -115,7 +117,7 @@ Critical flows:
 4. Save workflow after confirmation.
 5. Invalid JSON cannot be saved.
 
-## 5. Frontend tests
+## Frontend tests
 
 Minimum UI tests:
 
@@ -128,7 +130,7 @@ Minimum UI tests:
 7. AI workflow builder shows generated JSON and diagram.
 8. CSV export button downloads file for permitted users.
 
-## 6. Manual acceptance tests
+## Manual acceptance tests
 
 Before release, manually test:
 
@@ -144,7 +146,7 @@ Before release, manually test:
 10. Review audit logs.
 11. Confirm no cross-organization data leak with a second demo organization.
 
-## 7. Definition of done for v0.1
+## Definition of done for v0.1
 
 - All critical backend tests pass.
 - Docker Compose works from clean setup.

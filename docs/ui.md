@@ -1,16 +1,18 @@
 # Operra UI Requirements
 
-## 1. UI principles
+This document describes the public UI expectations for Operra v0.1.
 
-- Clean operational dashboard, not consumer social app.
-- Make status obvious.
-- Make approval actions fast.
-- Make audit history easy to inspect.
-- Avoid complex UI in v0.1.
-- JSON-first workflow config is acceptable for v0.1.
-- AI workflow builder should make workflow creation feel modern.
+## UI principles
 
-## 2. Main navigation
+- Clean operational dashboard, not a consumer social app
+- Make status obvious
+- Make approval actions fast
+- Make audit history easy to inspect
+- Avoid complex UI in v0.1
+- JSON-first workflow config is acceptable for v0.1
+- AI workflow builder should make workflow creation feel modern
+
+## Main navigation
 
 Suggested sidebar:
 
@@ -29,7 +31,7 @@ Settings
 
 Role-based visibility should apply.
 
-## 3. Required screens
+## Required screens
 
 ### Login
 
@@ -144,7 +146,7 @@ Actions by role:
 
 ### Pending approvals
 
-List of approval items assigned to current user's roles.
+List of approval items assigned to the current user's roles.
 
 Columns:
 

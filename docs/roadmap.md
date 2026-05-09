@@ -2,21 +2,23 @@
 
 This is the public implementation roadmap for Operra v0.1.
 
-## Completed foundation
+## What is already done
 
-- Monorepo scaffold
-- Docker Compose setup
-- Go API foundation
-- PostgreSQL migrations
-- Auth and organization setup
-- Users, departments, and roles
-- Workflow engine and validation
-- Purchase request drafting and submission
-- Approval actions, comments, audit logs, attachments, exports
-- Next.js frontend shell
-- Live frontend integration
+| Area | Status |
+|---|---|
+| Repo scaffold | Done |
+| Docker Compose | Done |
+| Go API foundation | Done |
+| PostgreSQL migrations | Done |
+| Auth and organization setup | Done |
+| Users, departments, and roles | Done |
+| Workflow engine and validation | Done |
+| Purchase request drafting and submission | Done |
+| Approval actions, comments, audit logs, attachments, exports | Done |
+| Next.js frontend shell | Done |
+| Live frontend integration | Done |
 
-## Current product shape
+## Current focus
 
 Operra v0.1 is focused on:
 
@@ -30,10 +32,10 @@ Operra v0.1 is focused on:
 ## Near-term improvements
 
 - Role assignment UI refinement
-- More advanced request and approval filters
-- Additional workflow management polish
+- Better request and approval filters
+- Workflow management polish
 - Attachment deletion if backend support is added later
-- Documentation polish and onboarding improvements
+- Documentation and onboarding polish
 
 ## Future ideas
 
@@ -42,4 +44,3 @@ Operra v0.1 is focused on:
 - Managed hosting support
 - Advanced analytics
 - Optional integrations
-

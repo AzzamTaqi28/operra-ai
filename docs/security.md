@@ -1,14 +1,14 @@
 # Operra Security Requirements
 
-## 1. Security principles
+This document defines the security rules for Operra v0.1.
 
 Operra handles sensitive operational data: purchase requests, attachments, approvals, comments, and audit logs.
 
 Security and tenant isolation are core requirements.
 
-## 2. Tenant isolation
+## Tenant isolation
 
-Rules:
+Keep every tenant boundary explicit:
 
 - Every tenant-owned table has `organization_id`.
 - Every tenant-owned query filters by `organization_id`.
@@ -28,9 +28,9 @@ must not fetch only by `id`. It must fetch by:
 id + organization_id
 ```
 
-## 3. Authentication
+## Authentication
 
-Requirements:
+Authentication rules:
 
 - Passwords must be hashed securely.
 - Login errors should not reveal whether email exists.
@@ -39,11 +39,11 @@ Requirements:
 - Do not store raw passwords.
 - Do not log passwords or tokens.
 
-## 4. Authorization
+## Authorization
 
 Backend must enforce permissions.
 
-Frontend may hide UI, but backend is the authority.
+Frontend may hide UI, but the backend is the authority.
 
 Important permission checks:
 
@@ -57,9 +57,9 @@ Important permission checks:
 - Director can approve director steps.
 - Auditor has read-only access.
 
-## 5. Approval safety
+## Approval safety
 
-Rules:
+Approval safety rules:
 
 - User cannot approve request from another organization.
 - User cannot approve a step requiring a role they do not have.
@@ -68,7 +68,7 @@ Rules:
 - Required steps cannot be skipped.
 - Rejected and completed requests are terminal in v0.1.
 
-## 6. AI safety
+## AI safety
 
 AI must not be trusted as authority.
 
@@ -89,9 +89,9 @@ AI cannot:
 
 Backend must validate AI-generated workflow JSON.
 
-## 7. Attachment security
+## Attachment security
 
-Rules:
+Attachment rules:
 
 - File metadata stored in database.
 - File content stored in S3-compatible storage.
@@ -109,9 +109,9 @@ Max file size: 10 MB or configurable
 Allowed default: PDF, images, documents, spreadsheets
 ```
 
-## 8. Audit log integrity
+## Audit log integrity
 
-Rules:
+Audit log rules:
 
 - Normal users cannot edit audit logs.
 - Audit logs should be append-only at application level.
@@ -120,9 +120,9 @@ Rules:
 - Every workflow activation logs audit entry.
 - Every attachment upload/download logs audit entry if useful.
 
-## 9. CSV export security
+## CSV export security
 
-Rules:
+CSV export rules:
 
 - Export endpoints require permission.
 - Export must be scoped by organization.
@@ -140,7 +140,7 @@ If a CSV cell begins with one of these characters:
 
 prefix with a single quote or otherwise escape safely.
 
-## 10. Secrets management
+## Secrets management
 
 Never commit:
 
@@ -152,7 +152,7 @@ Never commit:
 
 Use `.env.example` with placeholder values only.
 
-## 11. Logging safety
+## Logging safety
 
 Never log:
 
@@ -162,7 +162,7 @@ Never log:
 - Secret keys.
 - Full file contents.
 
-## 12. Minimum security tests
+## Minimum security tests
 
 1. User from organization A cannot access organization B requests.
 2. User without role cannot approve.

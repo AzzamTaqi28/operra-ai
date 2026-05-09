@@ -2,7 +2,7 @@
 
 ## 1. Deployment goal
 
-Operra v0.1 must run with Docker Compose.
+Operra v0.1 runs with Docker Compose for local development and self-hosted deployment.
 
 Target developer/self-hosted command:
 
@@ -10,24 +10,38 @@ Target developer/self-hosted command:
 docker compose up -d
 ```
 
-## 2. Required services
+## 2. Quick Start
 
-```text
-web       - Next.js frontend
-api       - Go backend API
-postgres  - PostgreSQL database
-minio     - S3-compatible object storage
+```bash
+cp .env.example .env
+docker compose up -d postgres minio
+docker compose up -d api web
 ```
+
+If you prefer one command after configuration:
+
+```bash
+docker compose up -d
+```
+
+## 3. Core services
+
+| Service | Purpose |
+|---|---|
+| `web` | Next.js frontend |
+| `api` | Go backend API |
+| `postgres` | PostgreSQL database |
+| `minio` | S3-compatible object storage |
 
 Optional later:
 
-```text
-redis
-worker
-ollama
-```
+| Future service | Purpose |
+|---|---|
+| `redis` | Queue or cache support |
+| `worker` | Background jobs |
+| `ollama` | Optional local AI provider |
 
-## 3. Example docker-compose.yml outline
+## 4. Example docker-compose.yml outline
 
 ```yaml
 services:
@@ -80,9 +94,13 @@ volumes:
   minio_data:
 ```
 
-## 4. Environment variables
+## 5. Environment variables
 
-`.env.example` should include:
+Copy `.env.example` to `.env` and set real values before first launch.
+
+`docker-compose.yml` and the API/web apps read from the same `.env` file.
+
+`.env.example` includes:
 
 ```env
 APP_ENV=development
@@ -112,7 +130,7 @@ SMTP_PASSWORD=
 SMTP_FROM=
 ```
 
-## 5. MinIO setup
+## 6. MinIO setup
 
 On first startup, the app should either:
 
@@ -125,7 +143,7 @@ Recommended bucket name:
 operra
 ```
 
-## 6. Database migrations
+## 7. Database migrations
 
 The API startup should not silently destroy data.
 
@@ -141,7 +159,22 @@ If using GORM AutoMigrate during early development, add a note:
 
 > AutoMigrate is allowed during early dev, but real migrations are required before release.
 
-## 7. Health checks
+Recommended first-run order:
+
+```bash
+cp .env.example .env
+docker compose up -d postgres minio
+docker compose up -d api web
+```
+
+If you are running everything locally without Compose, start the services in this order:
+
+1. PostgreSQL
+2. MinIO
+3. API
+4. Web app
+
+## 8. Health checks
 
 Required endpoints:
 
@@ -157,7 +190,7 @@ GET /ready
 - database connection
 - storage connectivity if possible
 
-## 8. Local development setup
+## 9. Local development setup
 
 Suggested setup:
 
@@ -175,19 +208,19 @@ cp .env.example .env
 docker compose up -d
 ```
 
-## 9. Production self-hosting notes
+## 10. Production self-hosting notes
 
 Production users should configure:
 
-- Strong JWT secret.
-- Secure database password.
+- A strong JWT secret.
+- A secure database password.
 - External S3-compatible storage or hardened MinIO.
-- HTTPS reverse proxy.
+- An HTTPS reverse proxy.
 - Database backups.
 - Object storage backups.
-- SMTP for email notification.
+- SMTP for email notifications.
 
-## 10. One-click deployment future
+## 11. One-click deployment future
 
 Future versions may support one-click deployment on container deployment platforms.
 
@@ -199,3 +232,10 @@ v0.1 should focus on:
 - clear environment variables
 - reliable README
 - minimal setup steps
+
+## 12. Public repo checklist
+
+- No real secrets in `.env.example`
+- No private beta or paid pilot language in public docs
+- README points to public docs only
+- GitHub templates are present for issues and pull requests

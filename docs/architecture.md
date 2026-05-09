@@ -2,9 +2,9 @@
 
 ## 1. Architecture summary
 
-Operra v0.1 is a modular monolith with a Go backend, Next.js frontend, PostgreSQL database, S3-compatible object storage, and Docker Compose deployment.
+Operra v0.1 is a modular monolith with a Go backend, Next.js frontend, PostgreSQL, S3-compatible object storage, and Docker Compose deployment.
 
-The system is multi-tenant using a shared database and shared schema. Tenant-owned records are scoped with `organization_id`.
+The system is multi-tenant with a shared database and shared schema. Tenant-owned records are scoped with `organization_id`.
 
 High-level architecture:
 
